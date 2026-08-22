@@ -1,26 +1,193 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+:root {
+  --background: #fdfdfd; /* extremely light gray/white */
+  --foreground: #0f172a; /* slate-900 */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f172a;
+    --foreground: #f8fafc;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --- Modern react-big-calendar Overrides --- */
+.rbc-calendar {
+  font-family: inherit;
+  background: white;
+  border-radius: 1rem;
+}
+
+/* Softer Grid Lines */
+.rbc-time-view, .rbc-time-header, .rbc-time-content, .rbc-day-bg, .rbc-header, .rbc-timeslot-group, .rbc-time-slot {
+  border-color: #f1f5f9 !important;
+}
+
+.rbc-time-header-content {
+  border-left: 1px solid #f1f5f9;
+}
+
+/* Make calendar time slots taller for better visibility of 1-hour events */
+/* Removed min-height to allow full fit without scrolling */
+
+/* Header Styling */
+.rbc-header {
+  padding: 16px 0;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+/* Event Blocks (The wrapper) */
+.rbc-event {
+  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  padding: 0px !important;
+  border-radius: 8px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: visible !important;
+}
+
+.rbc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  z-index: 10 !important;
+}
+
+.rbc-event-content {
+  height: 100%;
+  padding: 4px !important;
+  overflow: visible !important;
+}
+
+.rbc-event:focus {
+  outline: none;
+}
+
+/* Current Time Indicator */
+.rbc-current-time-indicator {
+  background-color: #ec4899; /* pink-500 */
+  height: 2px;
+}
+
+.rbc-current-time-indicator::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ec4899;
+}
+
+/* Today Column */
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px dashed #f3f4f6;
+}
+.rbc-today {
+  background-color: #fafaf9 !important; /* very subtle warm gray */
+}
+
+/* Toolbar styling */
+.rbc-toolbar {
+  margin-bottom: 24px;
+}
+.rbc-toolbar button {
+  border-radius: 10px !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.2s ease;
+  background: white;
+}
+.rbc-toolbar button:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+.rbc-toolbar button.rbc-active {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
+}
+.rbc-toolbar .rbc-toolbar-label {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+/* Minimize Event Time Label */
+.rbc-event-label {
+  font-size: 0.6rem !important;
+  opacity: 0.7;
+  padding: 0 4px !important;
+  margin-bottom: 2px;
+}
+
+/* Hide Time Label for Short Events (<= 1 hour) */
+.rbc-event.short-event .rbc-event-label {
+  display: none !important;
+}
+
+.rbc-event.short-event .rbc-event-content {
+  height: 100%;
+}
+
+/* React Time Picker Overrides */
+.custom-time-picker-wrapper .react-time-picker__wrapper {
+  border: none !important;
+}
+.custom-time-picker-wrapper .react-time-picker__inputGroup__input {
+  outline: none !important;
+  color: #1e293b;
+  font-weight: 600;
+}
+.react-clock {
+  background: white;
+}
+
+/* Recommendation Slot Styling */
+.rbc-event.recommendation-event {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Drag Preview Styling (Only applies while dragging) */
+.rbc-addons-dnd-drag-preview.has-conflict {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important; /* Red */
+  opacity: 0.95 !important;
+  border: 2px solid #991b1b !important;
+  box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.5) !important;
+  z-index: 100 !important;
+}
+
+.rbc-addons-dnd-drag-preview.no-conflict {
+  background: linear-gradient(135deg, #10b981, #059669) !important; /* Green */
+  opacity: 0.95 !important;
+  border: 2px solid #065f46 !important;
+  box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.5) !important;
+  z-index: 100 !important;
+}
+
+/* Ensure text is readable on red/green backgrounds */
+.rbc-addons-dnd-drag-preview .font-black {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
