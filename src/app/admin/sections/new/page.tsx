@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SectionGeneration() {
   const router = useRouter();
@@ -84,8 +85,14 @@ export default function SectionGeneration() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      {/* Navbar back to dashboard */}
+      <div className="max-w-3xl mx-auto mb-4">
+        <Link href="/admin/dashboard?tab=sections" className="text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-1.5 transition-colors">
+          &larr; Back to Student Sections
+        </Link>
+      </div>
+      <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-xs border border-slate-200">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Bulk Generate Sections</h2>
 
         {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">{error}</div>}

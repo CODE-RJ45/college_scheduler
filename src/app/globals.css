@@ -52,24 +52,23 @@ body {
 
 /* Event Blocks (The wrapper) */
 .rbc-event {
-  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  background: #4f46e5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1) !important;
   padding: 0px !important;
-  border-radius: 8px !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 6px !important;
+  transition: box-shadow 0.15s ease;
   overflow: visible !important;
 }
 
 .rbc-event:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-  z-index: 10 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+  z-index: 60 !important;
 }
 
 .rbc-event-content {
   height: 100%;
-  padding: 4px !important;
+  padding: 0px !important;
   overflow: visible !important;
 }
 
@@ -122,10 +121,10 @@ body {
   color: #0f172a !important;
 }
 .rbc-toolbar button.rbc-active {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+  background: #4f46e5 !important;
   color: white !important;
-  border-color: transparent !important;
-  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
+  border-color: #4338ca !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
 .rbc-toolbar .rbc-toolbar-label {
   font-weight: 800;
@@ -133,12 +132,9 @@ body {
   color: #0f172a;
 }
 
-/* Minimize Event Time Label */
+/* Hide Event Time Label so custom card gets 100% full height */
 .rbc-event-label {
-  font-size: 0.6rem !important;
-  opacity: 0.7;
-  padding: 0 4px !important;
-  margin-bottom: 2px;
+  display: none !important;
 }
 
 /* Hide Time Label for Short Events (<= 1 hour) */
@@ -171,18 +167,18 @@ body {
 
 /* Drag Preview Styling (Only applies while dragging) */
 .rbc-addons-dnd-drag-preview.has-conflict {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important; /* Red */
+  background: #dc2626 !important; /* Solid Red */
   opacity: 0.95 !important;
   border: 2px solid #991b1b !important;
-  box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.4) !important;
   z-index: 100 !important;
 }
 
 .rbc-addons-dnd-drag-preview.no-conflict {
-  background: linear-gradient(135deg, #10b981, #059669) !important; /* Green */
+  background: #059669 !important; /* Solid Green */
   opacity: 0.95 !important;
   border: 2px solid #065f46 !important;
-  box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.4) !important;
   z-index: 100 !important;
 }
 

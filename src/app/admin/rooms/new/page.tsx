@@ -89,8 +89,8 @@ export default function RoomRegistration() {
       
       {/* Navbar back to dashboard */}
       <div className="max-w-5xl mx-auto mb-4">
-         <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center">
-           &larr; Back to Dashboard
+         <Link href="/admin/dashboard?tab=rooms" className="text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-1.5 transition-colors">
+           &larr; Back to Facilities & Rooms
          </Link>
       </div>
 
