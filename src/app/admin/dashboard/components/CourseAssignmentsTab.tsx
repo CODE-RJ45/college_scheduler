@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 interface Department {
@@ -25,6 +26,7 @@ interface CourseAssignmentsTabProps {
   departments: Department[];
   terms: Term[];
   fetchData: () => void;
+  isStandalone?: boolean;
 }
 
 const extractErrorMessage = (err: any, fallback: string): string => {
@@ -54,12 +56,50 @@ export default function CourseAssignmentsTab({
   departments,
   terms,
   fetchData,
+  isStandalone = false,
 }: CourseAssignmentsTabProps) {
   // Find active term
   const activeTerm = useMemo(() => terms.find((t) => t.is_active) || null, [terms]);
 
   // View Mode: 'WORKBENCH' (By Faculty) vs 'MATRIX' (Curriculum Table)
   const [viewMode, setViewMode] = useState<'WORKBENCH' | 'MATRIX'>('WORKBENCH');
+
+  // Layout & Box Adjustment State
+  const [layoutPreset, setLayoutPreset] = useState<'BALANCED' | 'FOCUS_FACULTY' | 'FOCUS_AVAILABLE' | 'FOCUS_STAGED' | 'CUSTOM'>('BALANCED');
+  const [facultyRatio, setFacultyRatio] = useState<number>(33);
+  const [stagedRatio, setStagedRatio] = useState<number>(33);
+  const [availableRatio, setAvailableRatio] = useState<number>(34);
+  const [heightMode, setHeightMode] = useState<'standard' | 'tall' | 'fit'>(isStandalone ? 'fit' : 'standard');
+  const [cardDensity, setCardDensity] = useState<'normal' | 'compact'>('normal');
+  const [showSliders, setShowSliders] = useState<boolean>(false);
+
+  const applyLayoutPreset = (preset: 'BALANCED' | 'FOCUS_FACULTY' | 'FOCUS_AVAILABLE' | 'FOCUS_STAGED') => {
+    setLayoutPreset(preset);
+    setShowSliders(false);
+    if (preset === 'BALANCED') {
+      setFacultyRatio(33);
+      setStagedRatio(33);
+      setAvailableRatio(34);
+    } else if (preset === 'FOCUS_FACULTY') {
+      setFacultyRatio(45);
+      setStagedRatio(28);
+      setAvailableRatio(27);
+    } else if (preset === 'FOCUS_STAGED') {
+      setFacultyRatio(24);
+      setStagedRatio(52);
+      setAvailableRatio(24);
+    } else if (preset === 'FOCUS_AVAILABLE') {
+      setFacultyRatio(24);
+      setStagedRatio(28);
+      setAvailableRatio(48);
+    }
+  };
+
+  const containerHeight = useMemo(() => {
+    if (heightMode === 'tall') return '850px';
+    if (heightMode === 'fit') return isStandalone ? 'calc(100vh - 290px)' : 'calc(100vh - 360px)';
+    return '650px';
+  }, [heightMode, isStandalone]);
 
   // Filters State
   const [termFilter, setTermFilter] = useState<'ACTIVE' | number | 'ALL'>('ACTIVE');
@@ -345,36 +385,59 @@ export default function CourseAssignmentsTab({
           </p>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-          <button
-            type="button"
-            onClick={() => setViewMode('WORKBENCH')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
-              viewMode === 'WORKBENCH'
-                ? 'bg-white text-indigo-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span>Faculty Workbench</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('MATRIX')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
-              viewMode === 'MATRIX'
-                ? 'bg-white text-indigo-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            <span>Curriculum Matrix</span>
-          </button>
+        {/* Right Action Cluster: Fullscreen Launcher & View Mode Toggle */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {!isStandalone ? (
+            <Link
+              href="/admin/assignments"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition shadow-xs cursor-pointer"
+              title="Open Course Assignments in full in a new browser tab"
+            >
+              <span>Open in New Tab</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </Link>
+          ) : (
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Fullscreen Mode</span>
+            </div>
+          )}
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setViewMode('WORKBENCH')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
+                viewMode === 'WORKBENCH'
+                  ? 'bg-white text-indigo-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>Faculty Workbench</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('MATRIX')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
+                viewMode === 'MATRIX'
+                  ? 'bg-white text-indigo-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Curriculum Matrix</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -535,84 +598,284 @@ export default function CourseAssignmentsTab({
 
       {/* MODE 1: FACULTY WORKBENCH */}
       {viewMode === 'WORKBENCH' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[620px]">
-          {/* Left Column (4 cols): Searchable Faculty Roster with Workload Meters */}
-          <div className="lg:col-span-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[650px]">
-            <div className="mb-3">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Select Faculty Member
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Inspect and balance teaching loads
-              </p>
-              <div className="mt-2 relative">
-                <input
-                  type="text"
-                  placeholder="Filter faculty..."
-                  value={facultySearch}
-                  onChange={(e) => setFacultySearch(e.target.value)}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:bg-white"
-                />
-              </div>
+        <div className="space-y-3">
+          {/* Box Adjustment & Layout Toolbar */}
+          <div className="bg-slate-50/90 p-2.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+            {/* Column Width Presets */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-bold text-slate-700 uppercase tracking-wider text-[11px] mr-1">
+                Box Width:
+              </span>
+              <button
+                type="button"
+                onClick={() => applyLayoutPreset('BALANCED')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                  layoutPreset === 'BALANCED'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="Equal 3-column split (33% / 33% / 34%)"
+              >
+                Balanced
+              </button>
+              <button
+                type="button"
+                onClick={() => applyLayoutPreset('FOCUS_FACULTY')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                  layoutPreset === 'FOCUS_FACULTY'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="Wider faculty roster column (45%)"
+              >
+                Wide Faculty
+              </button>
+              <button
+                type="button"
+                onClick={() => applyLayoutPreset('FOCUS_STAGED')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                  layoutPreset === 'FOCUS_STAGED'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="Wider assigned load workbench column (52%)"
+              >
+                Wide Assigned
+              </button>
+              <button
+                type="button"
+                onClick={() => applyLayoutPreset('FOCUS_AVAILABLE')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                  layoutPreset === 'FOCUS_AVAILABLE'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="Wider available curriculum subjects catalog (48%)"
+              >
+                Wide Available
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSliders(!showSliders)}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer flex items-center space-x-1 ${
+                  showSliders || layoutPreset === 'CUSTOM'
+                    ? 'bg-slate-800 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+                title="Adjust box widths with custom percentage sliders"
+              >
+                <span>Custom Sliders</span>
+                <span className="text-[10px]">{showSliders ? '▲' : '▼'}</span>
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-              {filteredFacultyList.map((inst) => {
-                const isSelected = inst.id.toString() === selectedInstructorId;
-                const load = instructorLoads.get(inst.id) || { units: 0, count: 0, hours: 0 };
-
-                const maxHours = inst.max_hours_per_week || 30;
-                const isOverload = load.hours > maxHours || load.units > 21;
-                const isOptimal = (load.hours >= 18 && load.hours <= maxHours) || (load.units >= 15 && load.units <= 21);
-
-                let loadColor = 'bg-slate-100 text-slate-600 border-slate-200';
-                if (isOverload) {
-                  loadColor = 'bg-rose-50 text-rose-700 border-rose-200';
-                } else if (isOptimal) {
-                  loadColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                } else if (load.hours > 0 || load.units > 0) {
-                  loadColor = 'bg-amber-50 text-amber-700 border-amber-200';
-                }
-
-                return (
+            {/* View Sizing & Density */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Box Height Control */}
+              <div className="flex items-center space-x-1.5">
+                <span className="font-bold text-slate-600 text-[11px]">Height:</span>
+                <div className="flex bg-white rounded-lg border border-slate-200 p-0.5">
                   <button
-                    key={inst.id}
                     type="button"
-                    onClick={() => setSelectedInstructorId(inst.id.toString())}
-                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                      isSelected
-                        ? 'bg-indigo-50/60 border-indigo-400 shadow-xs'
-                        : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                    onClick={() => setHeightMode('standard')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
+                      heightMode === 'standard' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <div className="min-w-0 pr-2">
-                      <span className="text-xs font-bold text-slate-900 block truncate">
-                        {inst.first_name} {inst.last_name}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono block truncate">
-                        @{inst.username}
-                      </span>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${loadColor}`}>
-                        {load.hours.toFixed(1)} / {maxHours} hrs/wk
-                      </span>
-                      <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">
-                        {load.units} Units &bull; {load.count} {load.count === 1 ? 'course' : 'courses'}
-                      </span>
-                    </div>
+                    650px
                   </button>
-                );
-              })}
+                  <button
+                    type="button"
+                    onClick={() => setHeightMode('tall')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
+                      heightMode === 'tall' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    850px
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHeightMode('fit')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
+                      heightMode === 'fit' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Fit to full viewport height"
+                  >
+                    Fit Screen
+                  </button>
+                </div>
+              </div>
+
+              {/* Card Density */}
+              <div className="flex items-center space-x-1.5">
+                <span className="font-bold text-slate-600 text-[11px]">Density:</span>
+                <div className="flex bg-white rounded-lg border border-slate-200 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCardDensity('normal')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
+                      cardDensity === 'normal' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Normal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCardDensity('compact')}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold cursor-pointer ${
+                      cardDensity === 'compact' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Compact cards to see more courses without scrolling"
+                  >
+                    Compact
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Middle/Right Column (8 cols): Workbench Panels */}
-          <div className="lg:col-span-8 flex flex-col md:flex-row gap-4 h-[650px]">
-            {/* Left Sub-panel: Staged Assigned Courses */}
+          {/* Collapsible Sliders Drawer */}
+          {showSliders && (
+            <div className="bg-white p-3.5 rounded-xl border border-indigo-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                  <span>Faculty Roster Width:</span>
+                  <span className="text-indigo-600 font-bold">{facultyRatio}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="15"
+                  max="55"
+                  value={facultyRatio}
+                  onChange={(e) => {
+                    setLayoutPreset('CUSTOM');
+                    setFacultyRatio(Number(e.target.value));
+                  }}
+                  className="w-full accent-indigo-600 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                  <span>Assigned Load Width:</span>
+                  <span className="text-indigo-600 font-bold">{stagedRatio}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="20"
+                  max="65"
+                  value={stagedRatio}
+                  onChange={(e) => {
+                    setLayoutPreset('CUSTOM');
+                    setStagedRatio(Number(e.target.value));
+                  }}
+                  className="w-full accent-indigo-600 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                  <span>Available Cohorts Width:</span>
+                  <span className="text-indigo-600 font-bold">{availableRatio}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="20"
+                  max="65"
+                  value={availableRatio}
+                  onChange={(e) => {
+                    setLayoutPreset('CUSTOM');
+                    setAvailableRatio(Number(e.target.value));
+                  }}
+                  className="w-full accent-indigo-600 cursor-pointer"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 3-Column Resizable Boxes Container */}
+          <div className="flex flex-col lg:flex-row gap-4 transition-all">
+            {/* Box 1: Searchable Faculty Roster with Workload Meters */}
             <div
-              className="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden"
+              style={{ flex: `${facultyRatio} ${facultyRatio} 0%`, height: containerHeight }}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden transition-all min-w-[240px]"
+            >
+              <div className="mb-3">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Select Faculty Member
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Inspect and balance teaching loads
+                </p>
+                <div className="mt-2 relative">
+                  <input
+                    type="text"
+                    placeholder="Filter faculty..."
+                    value={facultySearch}
+                    onChange={(e) => setFacultySearch(e.target.value)}
+                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className={`flex-1 overflow-y-auto pr-1 custom-scrollbar ${cardDensity === 'compact' ? 'space-y-1' : 'space-y-1.5'}`}>
+                {filteredFacultyList.map((inst) => {
+                  const isSelected = inst.id.toString() === selectedInstructorId;
+                  const load = instructorLoads.get(inst.id) || { units: 0, count: 0, hours: 0 };
+
+                  const maxHours = inst.max_hours_per_week || 30;
+                  const isOverload = load.hours > maxHours || load.units > 21;
+                  const isOptimal = (load.hours >= 18 && load.hours <= maxHours) || (load.units >= 15 && load.units <= 21);
+
+                  let loadColor = 'bg-slate-100 text-slate-600 border-slate-200';
+                  if (isOverload) {
+                    loadColor = 'bg-rose-50 text-rose-700 border-rose-200';
+                  } else if (isOptimal) {
+                    loadColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                  } else if (load.hours > 0 || load.units > 0) {
+                    loadColor = 'bg-amber-50 text-amber-700 border-amber-200';
+                  }
+
+                  return (
+                    <button
+                      key={inst.id}
+                      type="button"
+                      onClick={() => setSelectedInstructorId(inst.id.toString())}
+                      className={`w-full text-left rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                        cardDensity === 'compact' ? 'p-2' : 'p-3'
+                      } ${
+                        isSelected
+                          ? 'bg-indigo-50/60 border-indigo-400 shadow-xs'
+                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                      }`}
+                    >
+                      <div className="min-w-0 pr-2">
+                        <span className="text-xs font-bold text-slate-900 block truncate">
+                          {inst.first_name} {inst.last_name}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono block truncate">
+                          @{inst.username}
+                        </span>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${loadColor}`}>
+                          {load.hours.toFixed(1)} / {maxHours} hrs/wk
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">
+                          {load.units} Units &bull; {load.count} {load.count === 1 ? 'course' : 'courses'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Box 2: Staged Assigned Courses */}
+            <div
+              style={{ flex: `${stagedRatio} ${stagedRatio} 0%`, height: containerHeight }}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden transition-all min-w-[240px]"
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDropToStaged}
             >
@@ -654,7 +917,7 @@ export default function CourseAssignmentsTab({
                 const isOverLimit = stagedHours > maxH;
 
                 return (
-                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 mb-3 text-xs space-y-1.5">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 mb-3 text-xs space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-[10px] font-bold text-slate-500 uppercase block">Availability:</span>
@@ -690,7 +953,7 @@ export default function CourseAssignmentsTab({
               })()}
 
               {/* Assigned List */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar border-2 border-dashed border-slate-200 rounded-lg p-2.5 bg-slate-50/50">
+              <div className={`flex-1 overflow-y-auto pr-1 custom-scrollbar border-2 border-dashed border-slate-200 rounded-lg p-2.5 bg-slate-50/50 ${cardDensity === 'compact' ? 'space-y-1.5' : 'space-y-2'}`}>
                 {!selectedInstructorId ? (
                   <div className="h-full flex items-center justify-center text-center p-6 text-slate-400 text-xs">
                     Please select an instructor from the left roster to view and manage their assignments.
@@ -706,27 +969,29 @@ export default function CourseAssignmentsTab({
                       key={ss.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, ss.id)}
-                      className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all flex items-center justify-between group"
+                      className={`bg-white rounded-lg border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all flex items-center justify-between group ${
+                        cardDensity === 'compact' ? 'p-2' : 'p-3'
+                      }`}
                     >
                       <div className="min-w-0 pr-2">
                         <div className="flex items-center space-x-2">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          <span className={`rounded font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 ${cardDensity === 'compact' ? 'text-[9px] px-1 py-0' : 'text-[10px] px-1.5 py-0.5'}`}>
                             {ss.course?.code}
                           </span>
-                          <span className="text-xs font-bold text-slate-900 truncate">
+                          <span className={`font-bold text-slate-900 truncate ${cardDensity === 'compact' ? 'text-[11px]' : 'text-xs'}`}>
                             {ss.course?.title || ss.course?.name}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1 flex items-center space-x-2">
-                          <span className="font-semibold text-slate-700">
+                        <div className={`text-slate-500 flex items-center space-x-2 ${cardDensity === 'compact' ? 'text-[10px] mt-0.5' : 'text-[11px] mt-1'}`}>
+                          <span className="font-semibold text-slate-700 truncate">
                             Cohort: {ss.section?.department?.code} {ss.section?.year_level}{ss.section?.name || 'A'}
                           </span>
                           <span>&bull;</span>
-                          <span className="font-semibold text-indigo-700">
+                          <span className="font-semibold text-indigo-700 shrink-0">
                             {ss.course?.has_lab ? '5.0 hrs/wk' : '3.0 hrs/wk'}
                           </span>
                           <span>&bull;</span>
-                          <span>{ss.course?.credits || 3} Units</span>
+                          <span className="shrink-0">{ss.course?.credits || 3} Units</span>
                         </div>
                       </div>
 
@@ -744,9 +1009,10 @@ export default function CourseAssignmentsTab({
               </div>
             </div>
 
-            {/* Right Sub-panel: Available / Unassigned Curriculum Sections */}
+            {/* Box 3: Available / Unassigned Curriculum Sections */}
             <div
-              className="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden"
+              style={{ flex: `${availableRatio} ${availableRatio} 0%`, height: containerHeight }}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden transition-all min-w-[240px]"
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDropToAvailable}
             >
@@ -762,7 +1028,7 @@ export default function CourseAssignmentsTab({
               </div>
 
               {/* Available List */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar border-2 border-dashed border-slate-200 rounded-lg p-2.5 bg-slate-50/50">
+              <div className={`flex-1 overflow-y-auto pr-1 custom-scrollbar border-2 border-dashed border-slate-200 rounded-lg p-2.5 bg-slate-50/50 ${cardDensity === 'compact' ? 'space-y-1.5' : 'space-y-2'}`}>
                 {availableWorkbenchSubjects.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-center p-6 text-slate-400 text-xs">
                     No curriculum subjects match the current filter criteria.
@@ -773,29 +1039,31 @@ export default function CourseAssignmentsTab({
                       key={ss.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, ss.id)}
-                      className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all flex items-center justify-between group"
+                      className={`bg-white rounded-lg border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all flex items-center justify-between group ${
+                        cardDensity === 'compact' ? 'p-2' : 'p-3'
+                      }`}
                     >
                       <div className="min-w-0 pr-2">
                         <div className="flex items-center space-x-2">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                          <span className={`rounded font-bold bg-slate-100 text-slate-800 border border-slate-200 ${cardDensity === 'compact' ? 'text-[9px] px-1 py-0' : 'text-[10px] px-1.5 py-0.5'}`}>
                             {ss.course?.code}
                           </span>
-                          <span className="text-xs font-bold text-slate-900 truncate">
+                          <span className={`font-bold text-slate-900 truncate ${cardDensity === 'compact' ? 'text-[11px]' : 'text-xs'}`}>
                             {ss.course?.title || ss.course?.name}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1 flex items-center space-x-2">
-                          <span className="font-semibold text-slate-700">
+                        <div className={`text-slate-500 flex items-center space-x-2 ${cardDensity === 'compact' ? 'text-[10px] mt-0.5' : 'text-[11px] mt-1'}`}>
+                          <span className="font-semibold text-slate-700 truncate">
                             Cohort: {ss.section?.department?.code} {ss.section?.year_level}{ss.section?.name || 'A'}
                           </span>
                           <span>&bull;</span>
-                          <span className="font-semibold text-indigo-700">
+                          <span className="font-semibold text-indigo-700 shrink-0">
                             {ss.course?.has_lab ? '5.0 hrs/wk' : '3.0 hrs/wk'}
                           </span>
                           <span>&bull;</span>
-                          <span>{ss.course?.credits || 3} Units</span>
+                          <span className="shrink-0">{ss.course?.credits || 3} Units</span>
                           <span>&bull;</span>
-                          <span className="text-amber-700 font-semibold">
+                          <span className="text-amber-700 font-semibold truncate shrink-0">
                             {ss.professor ? `${ss.professor.last_name} (Unstaged)` : 'TBA'}
                           </span>
                         </div>
