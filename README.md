@@ -2,12 +2,12 @@
 
 An enterprise-grade academic timetable automation and schedule management platform designed for higher education institutions. The system features a multi-pass constraint-satisfaction auto-scheduling engine, an interactive multi-perspective timetable calendar, faculty workload compliance monitoring, and centralized curriculum and facility inventory management.
 
-[![Framework](https://img.shields.io/badge/Next.js-16.3-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![UI Library](https://img.shields.io/badge/React-19.2-20232A?style=flat-square&logo=react)](https://react.dev/)
-[![Styling](https://img.shields.io/badge/Tailwind_CSS-4.0-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
-[![Backend](https://img.shields.io/badge/Django-5.0-092E20?style=flat-square&logo=django)](https://www.djangoproject.com/)
-[![API](https://img.shields.io/badge/Django_REST_Framework-3.15-A30000?style=flat-square)](https://www.django-rest-framework.org/)
-[![Runtime](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python)](https://www.python.org/)
+[![Next.js](docs/assets/badges/nextjs.svg)](https://nextjs.org/)
+[![React](docs/assets/badges/react.svg)](https://react.dev/)
+[![Tailwind CSS](docs/assets/badges/tailwind.svg)](https://tailwindcss.com/)
+[![Django](docs/assets/badges/django.svg)](https://www.djangoproject.com/)
+[![Django REST Framework](docs/assets/badges/drf.svg)](https://www.django-rest-framework.org/)
+[![Python](docs/assets/badges/python.svg)](https://www.python.org/)
 
 ---
 

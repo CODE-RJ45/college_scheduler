@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="98" height="20" role="img" aria-label="Python: 3.10+">
+  <g shape-rendering="crispEdges">
+    <rect width="52" height="20" fill="#334155"/>
+    <rect x="52" width="46" height="20" fill="#2563eb"/>
+  </g>
+  <g fill="#ffffff" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600">
+    <text x="26" y="14">Python</text>
+    <text x="75" y="14">3.10+</text>
+  </g>
+</svg>
